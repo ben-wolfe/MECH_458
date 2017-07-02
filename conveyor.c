@@ -10,8 +10,10 @@ DATE:
 DESCRIPTION:
 This firmware controls a DC-motor controlled conveyor system which sorts black, 
 white, steel, and aluminum blocks onto a tray which is controlled by a stepper 
-motor.  The system is controlled using two optical sensors and a reflective 
-sensor.  External interrupts trigger task execution.
+motor.  The system is controlled using two optical sensors, a reflective sensor, 
+and Hall Effect sensor.  External interrupts trigger task execution.  The stepper 
+motor runs using a linear optimization scheme published by Atmel: 
+www.atmel.com/images/doc8017.pdf
 
 */
 
@@ -372,16 +374,14 @@ void calibrate_reflective_sensor(){
 	PORTB = DC_FORWARD;
 	
 	while(1){
-		
 		//PORTC = ADC_conversion_count;
-		
 	}
 	
 	return;
 }
 
 /* count the prescribed number of milliseconds before returning where
-	delay() was called */
+   delay() was called */
 void delay(int msecTimeDelay){
 	
 	unsigned int counter = 0; //variable for counting the loop number
@@ -569,9 +569,9 @@ void calculate_stepper_profile(signed int step, unsigned int accel, unsigned int
 	return;
 }
 
+/* send_stepper_pulse() sends a step to the stepper motor when the
+   timer1 interrupt fires. */
 void send_stepper_pulse(signed char dir){
-//send_stepper_pulse() sends a step to the stepper motor when the
-//timer1 interrupt fires.
 	
 	if(dir == CCW){
 		step_position--;
@@ -588,10 +588,10 @@ void send_stepper_pulse(signed char dir){
 	return;
 } //end send_stepper_pulse
 
+/* speed_and_position_test() runs the stepper through a series of movements designed 
+   to test all the cases specified in rotate_stepper(). */
 void speed_and_position_test(){
-//speed_and_position_test() runs the stepper through a series of movements designed 
-//to test all the cases specified in rotate_stepper().
-
+	
 	required_position = STEEL;
 	if(stepper_movement_status == 0) rotate_stepper();
 	
@@ -717,52 +717,40 @@ void speed_and_position_test(){
 //--------------------------------------------------------- BLOCK CLASSIFICATION
 
 /* classify_block() adds a block to the list using the reflective value obtained
-	from the ADC conversion */
+   from the ADC conversion */
 void classify_block(){
 	
 	if((reflective_value >= ALUMINUM_MIN) && (reflective_value < ALUMINUM_MAX)){
 
-			block *newBlock;
-			create_new_block(&newBlock);
-			
-			newBlock->material = ALUMINUM; //material number assignment
-			
-			add_to_list(&newBlock); //add the block to the list
-			
-			total_conveyor_count++;
+		block *newBlock;
+		create_new_block(&newBlock);
+		newBlock->material = ALUMINUM; //material number assignment
+		add_to_list(&newBlock); //add the block to the list
+		total_conveyor_count++;
 			
 	} else if ((reflective_value >= STEEL_MIN) && (reflective_value < STEEL_MAX)){
 
-			block *newBlock;
-			create_new_block(&newBlock);
-
-			newBlock->material = STEEL; //material number assignment
-			
-			add_to_list(&newBlock);
-			
-			total_conveyor_count++;
+		block *newBlock;
+		create_new_block(&newBlock);
+		newBlock->material = STEEL; //material number assignment
+		add_to_list(&newBlock);
+		total_conveyor_count++;
 			
 	} else if ((reflective_value >= WHITE_MIN) && (reflective_value < WHITE_MAX)){
 
-			block *newBlock;
-			create_new_block(&newBlock);
-
-			newBlock->material = WHITE; //material number assignment
-			
-			add_to_list(&newBlock);
-			
-			total_conveyor_count++;
+		block *newBlock;
+		create_new_block(&newBlock);
+		newBlock->material = WHITE; //material number assignment	
+		add_to_list(&newBlock);
+		total_conveyor_count++;
 						
 	} else if ((reflective_value >= BLACK_MIN) && (reflective_value <= BLACK_MAX)){
 
-			block *newBlock;
-			create_new_block(&newBlock);
-
-			newBlock->material = BLACK; //material number assignment
-			
-			add_to_list(&newBlock);
-			
-			total_conveyor_count++;
+		block *newBlock;
+		create_new_block(&newBlock);
+		newBlock->material = BLACK; //material number assignment
+		add_to_list(&newBlock);
+		total_conveyor_count++;
 			
 	} else {
 
