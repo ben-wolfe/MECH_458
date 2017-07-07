@@ -8,6 +8,6 @@ control architectures and case studies in mechatronics systems.
 ## Project Description
 In this project, we were required to interface several sensors, a DC motor, and a stepper 
 motor to an Atmel AT90USB1287 microcontroller and program its operation in C. The system 
-collects data using two optical sensors, a reflective sensor, an inductive sensor, and a Hall 
+collected data using two optical sensors, a reflective sensor, an inductive sensor, and a Hall 
 effect sensor.  The conveyor succesfully sorted a total of 48 blocks (a random order of steel, 
 white, aluminum and black) in 28 seconds.
